@@ -1,6 +1,5 @@
 # Scal
-  # adjust num_s, lam, seed
-  # synthetic data
+  # synthetic data (adjust num_s, lam, seed)
     # lognormal
       # Scal
         python3 train.py --name scal --dataset synthetic --synthetic_dist lognormal --batch_size 200 --optimizer adam --model GammaNN --censor True --lr 1e-4 --num_s 1 --lam 1.0 --seed 1
