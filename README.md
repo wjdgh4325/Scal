@@ -21,9 +21,9 @@
 	# Weibull distribution
 	# Cox
 		# Scal
-		python train.py --name Cox_scal --dataset synthetic --synthetic_dist weibull --batch_size 200 --optimizer adam --model SyntheticNN --model_dist 	cox --censor True --lr 1e-4 --lam 1.0 --num_s 1 --seed 1
+		python train.py --name Cox_scal --dataset synthetic --synthetic_dist weibull --batch_size 200 --optimizer adam --model SyntheticNN --model_dist	cox --censor True --lr 1e-4 --lam 1.0 --num_s 1 --seed 1
 		# Xcal
-		python train_xcal.py --name Cox_xcal --dataset synthetic --synthetic_dist weiull --batch_size 200 --optimizer adam --model SyntheticNN --model_dist 	cox --censor True --lr 1e-4 --lam 1.0 --num_s 1 --seed 1
+		python train_xcal.py --name Cox_xcal --dataset synthetic --synthetic_dist weiull --batch_size 200 --optimizer adam --model SyntheticNN --model_dist cox --censor True --lr 1e-4 --lam 1.0 --num_s 1 --seed 1
 
 	# Parametric(lognormal)
 		# Scal
