@@ -15,7 +15,7 @@ class CatDist():
         self.interpolate = args.interpolate
 
     def predict_time(self):
-        pred_time = util.get_mean_bins(self.pred_params, self.args.mide_poinst)
+        pred_time = util.get_mean_bins(self.pred_params, self.args.mid_points)
 
         return pred_time
 
@@ -33,20 +33,19 @@ class CatDist():
         K = params.size()[-1]
         times = times.view(-1, 1)
         indices = torch.arange(K).view(1, -1).to(DEVICE)
-
         """
         Linear Interpolation for CDF
         """
 
         mask1 = (times > indices).float()
         mask2 = (times >= indices).float()
-
+        
         all_probs = torch.softmax(params, dim=-1)
         cdf_km1 = (all_probs * mask1).sum(dim=-1)
         prob_k = all_probs[range(batch_sz), times.squeeze()]
-
+        
         cdf_k = (all_probs * mask2).sum(dim=-1)
-        assert torch.all((cdf_k - (cdf_km1 * prob_k)).abs() < 1e-4)
+        assert torch.all((cdf_k - (cdf_km1 + prob_k)).abs() < 1e-4)
 
         if not self.interpolate:
             return cdf_k
@@ -82,7 +81,7 @@ def get_bin_for_time(tte, bin_boundaries):
 
 def cat_bin_target(args, tgt, bin_boundaries):
     bin_boundaries = torch.tensor(bin_boundaries).to(DEVICE)
-    tte, is_dead = tgt[:, 0].unsqueeze(-1), (tgt[:, 1]).unsqueeze(-1)
+    tte, is_dead = tgt[:, 0].unsqueeze(-1), tgt[:, 1].unsqueeze(-1)
 
     batch_sz = tte.size()[0]
 
@@ -90,7 +89,7 @@ def cat_bin_target(args, tgt, bin_boundaries):
 
     tte = tte.squeeze()
 
-    K = (bin_boundaries[:-1].size()[0])
+    K = (bin_boundaries[:-1]).size()[0]
     lower_boundaries = bin_boundaries[:-1].view(1, -1)
     upper_boundaries = bin_boundaries[1:].view(1, -1)
     

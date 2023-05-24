@@ -9,10 +9,8 @@ class BaseArgParser(object):
     """Base argument parser for args shared between test and train modes"""
     def __init__(self):
         self.parser = argparse.ArgumentParser(description="Head and Spine CT")
-        self.parser.add_argument('--model', type=str, choices=('SimpleNN', 'ActuallySimpleNN', 'LinearNN','SurvMNISTNN',
-                                                               'MarginalNN','MIMICNN','GammaNN','GammaNNSeparate', 'SplitNN',
-                                                               'AFTNN', 'MTLRNN'), default='SimpleNN', help='Model name.')
-        self.parser.add_argument('--model_dist', type=str, choices=('lognormal', 'cat', 'weibull', 'mtlr'), default='lognormal', help='Model name.')
+        self.parser.add_argument('--model', type=str, choices=('SyntheticNN', 'AFTNN', 'MTLRNN'), default='SyntheticNN', help='Model name.')
+        self.parser.add_argument('--model_dist', type=str, choices=('lognormal', 'weibull', 'mtlr', 'cox'), default='lognormal', help='Model name.')
         self.parser.add_argument('--lognormal_layers', type=int, default=3)
         self.parser.add_argument('--quantile', type=util.str_to_bool, default=False)
         self.parser.add_argument('--weibull_marginal', type=util.str_to_bool, default=False)
@@ -53,7 +51,7 @@ class BaseArgParser(object):
 
         # Save args to a JSON file
         try:
-            save_dir = os.path.join(args.save_dir, args.name + '_' + str(args.num_s) + '_ds_' + args.dataset + '_lam' + str(args.lam) + '_dr' + str(args.dropout_rate) + '_bs' + str(args.batch_size) + '_lr' + str(args.lr) + '_optim' + str(args.optimizer) + '_epoch' + str(args.num_epochs) + '_censor' + str(args.censor) + '_seed' + str(args.seed))
+            save_dir = os.path.join(args.save_dir, args.name + '_' + str(args.num_s) + '_ds_' + args.dataset + '_' + args.synthetic_dist + '_lam' + str(args.lam) + '_dr' + str(args.dropout_rate) + '_bs' + str(args.batch_size) + '_lr' + str(args.lr) + '_optim' + str(args.optimizer) + '_epoch' + str(args.num_epochs) + '_censor' + str(args.censor) + '_seed' + str(args.seed))
             
         except:
             save_dir = os.path.join(args.save_dir, args.name)

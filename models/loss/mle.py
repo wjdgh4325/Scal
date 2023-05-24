@@ -25,24 +25,40 @@ class MLE(nn.Module):
     # Fast forward
     def forward(self, pred_params, tgt, model_dist):
         tte, is_dead = tgt[:, 0], tgt[:, 1]
-
-        is_dead = is_dead.long().to(DEVICE)
-    
-        mask = torch.ones(tte.shape[0], tte.shape[0])
-        tte = tte.reshape(-1, 1)
-        mask[(tte - tte.T) > 0] = 0
-        mask = mask.to(DEVICE)
-        
-        log_pl = mask * torch.exp(pred_params).reshape(-1)
-        log_pl = torch.sum(log_pl, dim=1) / torch.sum(mask, dim=1)
-        log_pl = torch.log(log_pl).reshape(-1, 1)
-        
-        neg_log_pl = - torch.sum((pred_params - log_pl).reshape(-1) * is_dead) / torch.sum(is_dead)
         
         def bad(x):
             return torch.any(torch.isnan(x)) or torch.any(torch.isinf(x))
 
-        if bad(log_pl):
-            print("BAD LOG PDF in MLE")
+        is_dead = is_dead.long()
+        if model_dist == 'mtlr' or model_dist == 'lognormal':
+            cdf = util.get_cdf_val(pred_params, tgt, self.args)
+            logpdf = util.get_logpdf_val(pred_params, tgt, self.args)
 
-        return neg_log_pl
+            survival_func = 1.0 - cdf
+            log_survival = safe_log(survival_func, EPS = self.eps)
+            if bad(log_survival):
+                print("BAD LOG SURVIVAL in MLE")
+
+            if bad(logpdf):
+                print("BAD LOG PDF in MLE")
+
+            loglikelihood = is_dead * logpdf + (1 - is_dead) * log_survival
+            nll = -1.0 * loglikelihood
+            nll = nll.mean(dim=-1)
+
+        else:
+            mask = torch.ones(tte.shape[0], tte.shape[0])
+            tte = tte.reshape(-1, 1)
+            mask[(tte - tte.T) > 0] = 0
+            mask = mask.to(DEVICE)
+            
+            log_pl = mask * torch.exp(pred_params).reshape(-1)
+            log_pl = torch.sum(log_pl, dim=1) / torch.sum(mask, dim=1)
+            log_pl = torch.log(log_pl).reshape(-1, 1)
+            
+            nll = - torch.sum((pred_params - log_pl).reshape(-1) * is_dead) / torch.sum(is_dead)
+            
+            if bad(log_pl):
+                print("BAD LOG PDF in MLE")
+
+        return nll

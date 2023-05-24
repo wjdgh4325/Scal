@@ -16,9 +16,6 @@ import util
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def log_normal_mode(pytorch_distribution_object):
-    return (pytorch_distribution_object.loc - pytorch_distribution_object.scale.pow(2)).exp()
-
 def test(args):
     model, ckpt_info = ModelSaver.load_model(args.ckpt_path, args)
     args.start_epoch = ckpt_info['epoch'] + 1

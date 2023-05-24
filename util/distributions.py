@@ -16,7 +16,6 @@ import numpy as np
 from lifelines.utils import concordance_index
 from tqdm import tqdm
 
-import util
 from args import TestArgParser
 from evaluator import ModelEvaluator
 from logger import TestLogger
@@ -52,94 +51,31 @@ def pred_params_to_lognormal(pred_params):
 
     return pred
 
-def pred_params_to_dist(pred_params, args):
+def pred_params_to_dist(pred_params, tgt, args):
     if args.model_dist=='lognormal':
         pred = pred_params_to_lognormal(pred_params)
+    
     elif args.model_dist=='weibull':
         pred = pred_params_to_weibull(pred_params)
+
+    elif args.model_dist == 'mtlr':
+        pred = pred_params_to_cat(pred_params, args)
+
     else:
-        pred = pred_params_to_cat(pred_params,args)
+        pred = pred_params_to_cox(pred_params, tgt)
+
     return pred
 
-def compute_counts(event, time, order=None):
-    """Count right censored and uncensored samples at each unique time point.
-    Parameters
-    ----------
-    event : array
-        Boolean event indicator.
-    time : array
-        Survival time or time of censoring.
-    order : array or None
-        Indices to order time in ascending order.
-        If None, order will be computed.
-    Returns
-    -------
-    times : array
-        Unique time points.
-    n_events : array
-        Number of events at each time point.
-    n_at_risk : array
-        Number of samples that have not been censored or have not had an event at each time point.
-    n_censored : array
-        Number of censored samples at each time point.
-    """
-    n_samples = event.shape[0]
-
-    if order is None:
-        order = torch.argsort(time, kind="mergesort")
-
-    failure_times = torch.empty(n_samples, dtype=time.dtype)
-    uniq_events = torch.empty(n_samples, dtype=int)
-    uniq_counts = torch.empty(n_samples, dtype=int)
-
-    i = 0
-    prev_val = time[order[0]]
-    j = 0
-    while True:
-        count_event = 0
-        count = 0
-        while i < n_samples and prev_val == time[order[i]]:
-            if event[order[i]]:
-                count_event += 1
-
-            count += 1
-            i += 1
-
-        failure_times[j] = prev_val
-        uniq_events[j] = count_event
-        uniq_counts[j] = count
-        j += 1
-
-        if i == n_samples:
-            break
-
-        prev_val = time[order[i]]
-
-    times = np.resize(failure_times, j)
-    n_events = np.resize(uniq_events, j)
-    total_count = np.resize(uniq_counts, j)
-    n_censored = total_count - n_events
-    # offset cumulative sum by one
-    total_count = torch.cat((torch.tensor([0]), torch.tensor(total_count)), dim=-1)
-    n_at_risk = n_samples - torch.cumsum(total_count, dim = 0)
-
-    return times, n_events, n_at_risk[:-1], n_censored
-
-def get_cdf_val(pred_params, tgt, args):
+def pred_params_to_cox(pred_params, tgt):
     risk_score = torch.exp(pred_params)
     tte, is_dead = tgt[:, 0], tgt[:, 1]
-    
-    if args.model_dist in ['cat','mtlr']:
-        tte, is_alive, ratio = tgt[:, 0], tgt[:, 1], tgt[:, 2]
-        cdf = pred.cdf(tte, ratio)
-
     while True:
         tie_breaking = torch.rand(len(tte)) * 1e-6
         while len(tte) != len(torch.unique(tte + tie_breaking.to(DEVICE))):
             tie_breaking = torch.rand(len(tte)) * 1e-6
 
         break
-    
+        
     tie_breaking = tie_breaking.to(DEVICE)
     tte = tte + tie_breaking
 
@@ -157,21 +93,26 @@ def get_cdf_val(pred_params, tgt, args):
     S = torch.exp(-H) + 1e-13 # Baseline survival function
     
     cdf = 1 - S ** risk_score
-    
+
     return cdf
 
-def pred_params_to_dist(pred_params, args):
-    if args.model_dist=='lognormal':
-        pred = pred_params_to_lognormal(pred_params)
+def get_cdf_val(pred_params, tgt, args):
+    
+    pred = pred_params_to_dist(pred_params, tgt, args)
 
-    elif args.model_dist=='weibull':
-        pred = pred_params_to_weibull(pred_params)
+    if args.model_dist in ['cat','mtlr']:
+        tte, is_dead, ratio = tgt[:, 0], tgt[:, 1], tgt[:, 2]
+        cdf = pred.cdf(tte, ratio)
 
+    elif args.model_dist == 'lognormal':
+        tte, is_dead = tgt[:, 0], tgt[:, 1]
+        cdf = pred.cdf(tte + 1e-4)
+        
     else:
-        pred = pred_params_to_cat(pred_params, args)
+        cdf = pred
 
-    return pred
-
+    return cdf
+    
 def get_predict_time(pred, args):
     if args.model_dist in ['cat','mtlr']:
         return pred.predict_time()
@@ -195,3 +136,17 @@ def get_predict_time(pred, args):
         assert False, "wrong dist or pred type in predict time in utils"
     
     return pred_time
+
+def get_logpdf_val(pred_params, tgt, args):
+
+    pred = pred_params_to_dist(pred_params, tgt, args)
+    tte = tgt[:,0]
+
+    if args.model_dist == 'lognormal' or args.model_dist == 'weibull':
+        tte = tte + 1e-4
+    log_prob = pred.log_prob(tte)
+    
+    return log_prob
+
+def log_normal_mode(pytorch_distribution_object):
+    return (pytorch_distribution_object.loc - pytorch_distribution_object.scale.pow(2)).exp()

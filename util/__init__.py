@@ -4,6 +4,7 @@ from .d_calibration import *
 from .distributions import *
 from .get_bin_boundaries import *
 from .get_loaders import *
+from .get_mean_bins import *
 from .get_tte_min_max import *
 from .io_util import *
 from .mtlr_utils import *

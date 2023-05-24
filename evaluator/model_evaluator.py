@@ -110,7 +110,7 @@ class ModelEvaluator(object):
                 break
 
             pred_params = model.forward(src)
-            cdf = util.get_cdf_val(pred_params, tgt, self.args) # check again
+            cdf = util.get_cdf_val(pred_params, tgt, self.args)
             all_cdf.append(cdf)
             loss = loss_fn(pred_params, tgt, model_dist=self.model_dist)
             num_both = pred_params.size()[0]
