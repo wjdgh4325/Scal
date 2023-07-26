@@ -99,7 +99,7 @@ class ModelEvaluator_test(object):
 
             if self.model_dist in ['cat', 'mtlr']:
                 tgt = util.cat_bin_target(self.args, tgt, self.bin_boundaries) # check again
-
+                
             # THIS MUST COME AFTER THE ABOCE CAT BIN TARGET FUNCTION
             # BECAUSE CAT BIN TARGET CAN CHANGE SOME IS_DEAD
             is_dead = tgt[:, 1]
@@ -133,17 +133,18 @@ class ModelEvaluator_test(object):
         all_cdf = torch.cat(all_cdf)
 
         all_tte = torch.cat(all_tte)
+
+        torch.save(all_tte, "C:/Users/wjdgh/Desktop/collection/scal_" + str(self.args.num_s) + '_' + str(self.args.lam) + "_tte.pt")
+        torch.save(is_dead, "C:/Users/wjdgh/Desktop/collection/scal_" + str(self.args.num_s) + '_' + str(self.args.lam) + "_is_dead.pt")
+        torch.save(all_cdf, "C:/Users/wjdgh/Desktop/collection/scal_" + str(self.args.num_s) + '_' + str(self.args.lam) + "_cdf.pt")
+        if self.args.model_dist == 'mtlr':
+            weight = model.get_weight()
+            regularizer = util.ridge_norm(weight)*self.args.C1/2 + util.fused_norm(weight)*self.args.C2/2
         
         # Map to summary dictionaries
         metrics = self._get_summary_dict(phase, **records)
-        #s_calibration = util.s_calibration(points = all_cdf, args = self.args, is_dead = is_dead) # check again
         approx_s_calibration = util.s_calibration(points=all_cdf, is_dead=is_dead, args=self.args, gamma=1e5, differentiable=False, device=DEVICE)
-        #approx_u1_calibration = util.u1_calibration(points = all_cdf, is_dead = is_dead, args = self.args, gamma = 1e8, device = DEVICE)
-        #approx_u2_calibration = util.u2_calibration(points = all_cdf, is_dead = is_dead, args = self.args, gamma = 1e8, device = DEVICE)
-        #approx_u3_calibration = util.u3_calibration(points = all_cdf, is_dead = is_dead, args = self.args, gamma = 1e8, device = DEVICE)
-        
         test_statistic, p_value = util.get_p_value(cdf=all_cdf, tte=all_tte, is_dead=is_dead, device=DEVICE) # check again
-        #d_calibration = util.d_calibration(points = all_cdf, is_dead = is_dead, args = self.args, nbins = self.num_xcal_bins)
         approx_d_calibration_10 = util.d_calibration(points=all_cdf, is_dead=is_dead, args=self.args, nbins=10, gamma=1e5, differentiable=False, device=DEVICE)
         approx_d_calibration_20 = util.d_calibration(points=all_cdf, is_dead=is_dead, args=self.args, nbins=self.num_xcal_bins, gamma=1e5, differentiable=False, device=DEVICE)
         approx_d_calibration_40 = util.d_calibration(points=all_cdf, is_dead=is_dead, args=self.args, nbins=self.num_xcal_bins*2, gamma=1e5, differentiable=False, device=DEVICE)
@@ -153,15 +154,15 @@ class ModelEvaluator_test(object):
         metrics[phase + '_' + 'NLL'] = metrics[phase + '_' + 'loss']
         metrics[phase + '_' + 'concordance'] = concordance
         metrics[phase + '_' + 'scal(20)'] = approx_s_calibration
-        #metrics[phase + '_' + 'approxucal1'] = approx_u1_calibration
-        #metrics[phase + '_' + 'approxucal2'] = approx_u2_calibration
-        #metrics[phase + '_' + 'approxucal3'] = approx_u3_calibration
-        #metrics[phase + '_' + 'dcal'] = d_calibration
         metrics[phase + '_' + 'dcal(10)'] = approx_d_calibration_10
         metrics[phase + '_' + 'dcal(20)'] = approx_d_calibration_20
         metrics[phase + '_' + 'dcal(40)'] = approx_d_calibration_40
         metrics[phase + '_' + 'dcal(60)'] = approx_d_calibration_60
-        metrics[phase + '_' + 'loss'] = metrics[phase + '_' + 'loss'] + self.lam * approx_s_calibration
+        if self.model_dist in ['mtlr']:
+            metrics[phase + '_' + 'loss'] = metrics[phase + '_' + 'loss'] + self.lam * approx_s_calibration + regularizer
+
+        else:
+            metrics[phase + '_' + 'loss'] = metrics[phase + '_' + 'loss'] + self.lam * approx_s_calibration
         metrics[phase + '_' + 'teststat'] = test_statistic
         metrics[phase + '_' + 'pvalue'] = p_value
         #metrics[phase + '_' + 'brier score'] = brier_score
