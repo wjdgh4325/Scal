@@ -31,19 +31,22 @@ class BaseArgParser(object):
         self.parser.add_argument('--num_classes', default=1, type=int, help='Number of classes to predict.')
         self.parser.add_argument('--num_workers', default=0, type=int, help='Number of threads for the DataLoader.')
         self.parser.add_argument('--save_dir', type=str, default='ckpts/', help='Directory in which to save model checkpoints.')
-        self.parser.add_argument('--dataset', type=str, default='mimic', choices=('mimic', 'synthetic', 'mnist', 'newmimic', 'metabric', 'nacd', 'nacdcol', 'brca', 'read', 'gbm', 'gbmlgg', 'dbcd', 'dlbcl'),
-                                help='Dataset to use. Gets mapped to dataset class name.')
+        self.parser.add_argument('--dataset', type=str, default='synthetic', choices=('mimic', 'synthetic', 'glioma', 'metabric', 'support'), help='Dataset to use. Gets mapped to dataset class name.')
         self.parser.add_argument('--verbose', action='store_true')
         self.parser.add_argument('--lam', type=float, default=0.0, help='regularization scale for d-calibration')
         self.parser.add_argument('--dropout_rate', type=float, default=0.1)
         self.parser.add_argument('--pred_type', type=str, default='mode', choices=('mean', 'mode'))
-        self.parser.add_argument('--synthetic_dist', type=str, default='lognormal', choices=['gamma', 'lognormal', 'lognormal_mar', 'simple_cat', 'weibull'])
+        self.parser.add_argument('--synthetic_dist', type=str, default='lognormal', choices=['lognormal', 'weibull'])
         self.parser.add_argument('--censor', type=util.str_to_bool, default=False)
         self.parser.add_argument('--use_max_pool', type=util.str_to_bool, default=False)
         self.parser.add_argument('--big_gamma_nn', type=util.str_to_bool, default=True)
         self.parser.add_argument('--interpolate', type=util.str_to_bool, default=True)
         self.parser.add_argument('--num_xcal_bins', type=int, default=20)
         self.parser.add_argument('--num_s', type=int, default=1, help='number of s')
+        self.parser.add_argument('--alpha', type=int, default=1, help='determining parameter of Beta distribution')
+        self.parser.add_argument('--beta', type=int, default=1, help='determining parameter of Beta distribution')
+        self.parser.add_argument('--C1', type=float, default=0)
+        self.parser.add_argument('--C2', type=float, default=0)
         self.is_training = None
 
     def parse_args(self):
@@ -51,8 +54,28 @@ class BaseArgParser(object):
 
         # Save args to a JSON file
         try:
-            save_dir = os.path.join(args.save_dir, args.name + '_' + str(args.num_s) + '_ds_' + args.dataset + '_' + args.synthetic_dist + '_lam' + str(args.lam) + '_dr' + str(args.dropout_rate) + '_bs' + str(args.batch_size) + '_lr' + str(args.lr) + '_optim' + str(args.optimizer) + '_epoch' + str(args.num_epochs) + '_censor' + str(args.censor) + '_seed' + str(args.seed))
-            
+            if args.dataset == 'synthetic':
+                if 'scal' in args.name:
+                    if args.model_dist == 'mtlr':
+                        save_dir = os.path.join(args.save_dir, args.model_dist + '_' + args.name + '_' + str(args.alpha) + str(args.beta) + '_' + str(args.num_s) + '_ds_' + args.dataset + '_' + args.synthetic_dist + '_lam' + str(args.lam) + '_bs' + str(args.batch_size) + '_lr' + str(args.lr) + '_optim' + str(args.optimizer) + '_epoch' + str(args.num_epochs) + '_censor' + str(args.censor) + '_seed' + str(args.seed))
+                    else:
+                        save_dir = os.path.join(args.save_dir, args.model_dist + '_' + args.name + '_' + str(args.alpha) + str(args.beta) + '_' + str(args.num_s) + '_ds_' + args.dataset + '_' + args.synthetic_dist + '_lam' + str(args.lam) + '_dr' + str(args.dropout_rate) + '_bs' + str(args.batch_size) + '_lr' + str(args.lr) + '_optim' + str(args.optimizer) + '_epoch' + str(args.num_epochs) + '_censor' + str(args.censor) + '_seed' + str(args.seed))
+                else:
+                    if args.model_dist == 'mtlr':
+                        save_dir = os.path.join(args.save_dir, args.model_dist + '_' + args.name + '_' + str(args.num_xcal_bins) + '_ds_' + args.dataset + '_' + args.synthetic_dist + '_lam' + str(args.lam) + '_bs' + str(args.batch_size) + '_lr' + str(args.lr) + '_optim' + str(args.optimizer) + '_epoch' + str(args.num_epochs) + '_censor' + str(args.censor) + '_seed' + str(args.seed))
+                    else:
+                        save_dir = os.path.join(args.save_dir, args.model_dist + '_' + args.name + '_' + str(args.num_xcal_bins) + '_ds_' + args.dataset + '_' + args.synthetic_dist + '_lam' + str(args.lam) + '_dr' + str(args.dropout_rate) + '_bs' + str(args.batch_size) + '_lr' + str(args.lr) + '_optim' + str(args.optimizer) + '_epoch' + str(args.num_epochs) + '_censor' + str(args.censor) + '_seed' + str(args.seed))
+            else:
+                if 'scal' in args.name:
+                    if args.model_dist == 'mtlr':
+                        save_dir = os.path.join(args.save_dir, args.model_dist + '_' + args.name + '_' + str(args.alpha) + str(args.beta) + '_' + str(args.num_s) + '_ds_' + args.dataset + '_lam' + str(args.lam) + '_bs' + str(args.batch_size) + '_lr' + str(args.lr) + '_optim' + str(args.optimizer) + '_epoch' + str(args.num_epochs) + '_seed' + str(args.seed))
+                    else:
+                        save_dir = os.path.join(args.save_dir, args.model_dist + '_' + args.name + '_' + str(args.alpha) + str(args.beta) + '_' + str(args.num_s) + '_ds_' + args.dataset + '_lam' + str(args.lam) + '_dr' + str(args.dropout_rate) + '_bs' + str(args.batch_size) + '_lr' + str(args.lr) + '_optim' + str(args.optimizer) + '_epoch' + str(args.num_epochs) + '_seed' + str(args.seed))
+                else:
+                    if args.model_dist == 'mtlr':
+                        save_dir = os.path.join(args.save_dir, args.model_dist + '_' + args.name + '_' + str(args.num_xcal_bins) + '_ds_' + args.dataset + '_lam' + str(args.lam) + '_bs' + str(args.batch_size) + '_lr' + str(args.lr) + '_optim' + str(args.optimizer) + '_epoch' + str(args.num_epochs) + '_seed' + str(args.seed))
+                    else:
+                        save_dir = os.path.join(args.save_dir, args.model_dist + '_' + args.name + '_' + str(args.num_xcal_bins) + '_ds_' + args.dataset + '_lam' + str(args.lam) + '_dr' + str(args.dropout_rate) + '_bs' + str(args.batch_size) + '_lr' + str(args.lr) + '_optim' + str(args.optimizer) + '_epoch' + str(args.num_epochs) + '_seed' + str(args.seed))
         except:
             save_dir = os.path.join(args.save_dir, args.name)
         
