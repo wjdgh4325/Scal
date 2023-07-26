@@ -94,6 +94,42 @@ class SyntheticDataset(data.Dataset):
     def __len__(self):
         return len(self.src)
 
+class RealDataset(data.Dataset):
+    def __init__(self, x, surv_t, is_dead, phase, is_training=True):
+        #print(x.size())
+        #print(surv_t.size())
+        #print(censor_t.size())
+        assert x.size()[0] == surv_t.size()[0]
+
+        t = surv_t
+        dead = is_dead
+        print(t.size())
+        print(dead.size())
+
+        target = torch.zeros((t.size()[0], 2))
+        target[:, 0] = t.squeeze()
+        target[:, 1] = dead.squeeze()
+        target = target
+
+        self.src = x.float()
+        self.tgt = target.float()
+        self.survival_times = surv_t.float()
+
+        self.is_training = is_training
+        self.num_examples = x.size()[0]
+        self.D_in = x.size()[1]
+
+        self.phase = phase
+
+    def __getitem__(self, index):
+        x = self.src[index]
+        y = self.tgt[index]
+
+        return x, y
+
+    def __len__(self):
+        return len(self.src)
+
 def get_synthetic_loader(args, phase, is_training=True, shuffle=False, dist='lognormal', censor=True):
     print('-' * 69)
     print("Making Dataloader for {}".format(phase))
@@ -110,7 +146,7 @@ def get_synthetic_loader(args, phase, is_training=True, shuffle=False, dist='log
     else:
         assert False, "wrong phase"
 
-    prefix = 'data/'
+    prefix = str(args.data_dir)
     xfilename = prefix + '{}_x_{}.pt'.format(dist, suffix)
     survtfilename = prefix + '{}_surv_t_{}.pt'.format(dist, suffix)
     censortfilename = prefix + '{}_censor_t_{}.pt'.format(dist, suffix)
@@ -139,3 +175,30 @@ def get_synthetic_loader(args, phase, is_training=True, shuffle=False, dist='log
     print('-' * 69)
 
     return loader
+
+def get_real_loader(args, phase, is_training=True, data='metabric', shuffle=False):
+    print('-' * 69)
+    print("Making Dataloader for {}".format(phase))
+
+    prefix = str(args.data_dir)
+    xfilename = prefix + '{}_{}_x.pt'.format(data, phase)
+    survtfilename = prefix + '{}_{}_t.pt'.format(data, phase)
+    eventfilename = prefix + '{}_{}_e.pt'.format(data, phase)
+
+    print("Loading file: {}".format(xfilename))
+    print("Loading file: {}".format(survtfilename))
+    print("Loading file: {}".format(eventfilename))
+    
+    x = torch.load(xfilename)
+    t = torch.load(survtfilename)
+    e = torch.load(eventfilename)
+    
+    dataset = RealDataset(x=x, surv_t=t, is_dead=e, phase=phase, is_training=is_training)
+    loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, num_workers=args.num_workers, shuffle=shuffle)
+
+    loader.phase = phase
+    loader.D_in = dataset.D_in
+    print('-' * 69)
+
+    return loader
+    
