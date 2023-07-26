@@ -69,16 +69,17 @@ def pred_params_to_dist(pred_params, tgt, args):
 def pred_params_to_cox(pred_params, tgt):
     risk_score = torch.exp(pred_params)
     tte, is_dead = tgt[:, 0], tgt[:, 1]
+    """
     while True:
         tie_breaking = torch.rand(len(tte)) * 1e-6
         while len(tte) != len(torch.unique(tte + tie_breaking.to(DEVICE))):
             tie_breaking = torch.rand(len(tte)) * 1e-6
 
         break
-        
+     
     tie_breaking = tie_breaking.to(DEVICE)
     tte = tte + tie_breaking
-
+    """
     order = torch.argsort(tte)
     tte = tte[order].reshape(-1, 1)
     is_dead = is_dead[order]

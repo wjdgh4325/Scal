@@ -101,11 +101,14 @@ def train(args):
                 
                 if args.model_dist in ['cat', 'mtlr']:
                     tgt = util.cat_bin_target(args, tgt, bin_boundaries)
+                    weight = model.get_weight()
 
                 loss = 0
                 if not args.loss_scal_only:
-                    loss += loss_fn(pred_params, tgt, model_dist=args.model_dist)
-
+                    if args.model_dist in ['mtlr']:
+                        loss += loss_fn(pred_params, tgt, model_dist=args.model_dist) + util.ridge_norm(weight)*args.C1/2 + util.fused_norm(weight)*args.C2/2
+                    else:
+                        loss += loss_fn(pred_params, tgt, model_dist=args.model_dist)
                 if args.lam > 0 or args.loss_scal_only:
                     s_cal = compute_scal(pred_params, tgt, args)
 
@@ -123,7 +126,7 @@ def train(args):
                 loss.backward()
 
                 optimizer.step()
-                
+
             logger.end_iter()
         end = time.time()
         print(f"{end - start:.5f} sec")

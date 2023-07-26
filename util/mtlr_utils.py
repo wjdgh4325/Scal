@@ -20,11 +20,11 @@ def pad_col(input, val=0, where='end'):
         return torch.cat([pad, input], dim=1)
 
     raise ValueError(f"Need 'where' to be 'start' or 'end', got {where}")
-
+    
 def cumsum_reverse(input: torch.Tensor, dim: int=1) -> torch.Tensor:
     if dim != 1:
         raise NotImplementedError
 
     input = input.sum(1, keepdim=True) - pad_col(input, where='start')
-
+    
     return input

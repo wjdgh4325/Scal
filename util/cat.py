@@ -67,9 +67,12 @@ class CatDist():
 
         return interpolated_cdf
 
-def cat_l2_norm(params):
-    diffs = params[:, 1:] - params[:, :-1]
-    total_diffs = torch.norm(diffs) / params.shape[0]
+def ridge_norm(params):
+    return torch.norm(params) ** 2
+
+def fused_norm(params):
+    diffs = params[1:, :] - params[:-1, :]
+    total_diffs = torch.norm(diffs) ** 2
 
     return total_diffs
 

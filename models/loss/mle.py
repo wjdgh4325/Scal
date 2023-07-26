@@ -41,7 +41,7 @@ class MLE(nn.Module):
 
             if bad(logpdf):
                 print("BAD LOG PDF in MLE")
-
+            
             loglikelihood = is_dead * logpdf + (1 - is_dead) * log_survival
             nll = -1.0 * loglikelihood
             nll = nll.mean(dim=-1)

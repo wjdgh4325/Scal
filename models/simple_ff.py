@@ -58,6 +58,11 @@ class MTLRNN(nn.Module):
         preds = util.cumsum_reverse(preds, dim=1)
         
         return preds
+    
+    def get_weight(self):
+        weight = self.fc.weight
+        
+        return weight
 
 class AFTNN(nn.Module):
     def __init__(self, data_dir, D_in, model_dist, big_gamma_nn, num_cat_bins, hiddensize, dropout_rate, **kwargs):
@@ -137,7 +142,7 @@ class LogNormalhelper(nn.Module):
     def forward(self, src):
         mu = self.mu_model(src).view(-1, 1)
         pre_log_sigma = self.sigma_model(src).view(-1, 1)
-        pred = torch.cat([mu, pre_log_sigma], dim = 1)
+        pred = torch.cat([mu, pre_log_sigma], dim=1)
         
         return pred
 

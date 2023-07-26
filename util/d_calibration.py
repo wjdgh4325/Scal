@@ -5,6 +5,7 @@ def d_calibration(points, is_dead, args, nbins=20, differentiable=False, gamma=1
     new_is_dead = is_dead.detach().clone()
     new_is_dead[points > 1. - 1e-4] = 1
     points = points.to(device).view(-1, 1)
+    
     bin_width = 1.0 / nbins
     bin_indices = torch.arange(nbins).view(1, -1).float().to(device)
     bin_a = bin_indices * bin_width

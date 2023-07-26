@@ -1,7 +1,7 @@
 import os
 
-for k in [1, 2, 5, 10]:
-    for j in [1500, 2500]:
-        for i in range(1, 11):
-            file_list = "train.py --name 0309_scal_0.5 --dataset synthetic --batch_size 200 --optimizer adam --model GammaNN --censor True --lr 1e-4 --lam " + str(j) + " --num_s " + str(k) + " --seed " + str(i)
+for i in [1, 10, 100, 1000]:
+    for j in [1, 2, 5, 10, 20]:
+        for k in range(1, 21):
+            file_list = "train.py --name scal --alpha 4 --beta 4 --dataset metabric --batch_size 64 --optimizer adam --model SyntheticNN --model_dist cox --censor True --data_dir data/metabric/ --lr 1e-4 --lam " + str(i) + " --num_s " + str(j) + " --seed " + str(k)
             os.system("python " + file_list)
