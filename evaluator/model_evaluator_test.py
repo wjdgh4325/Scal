@@ -134,9 +134,9 @@ class ModelEvaluator_test(object):
 
         all_tte = torch.cat(all_tte)
 
-        torch.save(all_tte, "C:/Users/wjdgh/Desktop/collection/scal_" + str(self.args.num_s) + '_' + str(self.args.lam) + "_tte.pt")
-        torch.save(is_dead, "C:/Users/wjdgh/Desktop/collection/scal_" + str(self.args.num_s) + '_' + str(self.args.lam) + "_is_dead.pt")
-        torch.save(all_cdf, "C:/Users/wjdgh/Desktop/collection/scal_" + str(self.args.num_s) + '_' + str(self.args.lam) + "_cdf.pt")
+        #torch.save(all_tte, "C:/Users/wjdgh/Desktop/collection/scal_" + str(self.args.num_s) + '_' + str(self.args.k) + '_' + str(self.args.lam) + "_tte.pt")
+        #torch.save(is_dead, "C:/Users/wjdgh/Desktop/collection/scal_" + str(self.args.num_s) + '_' + str(self.args.k) + '_' + str(self.args.lam) + "_is_dead.pt")
+        #torch.save(all_cdf, "C:/Users/wjdgh/Desktop/collection/scal_" + str(self.args.num_s) + '_' + str(self.args.k) + '_' + str(self.args.lam) + "_cdf.pt")
         if self.args.model_dist == 'mtlr':
             weight = model.get_weight()
             regularizer = util.ridge_norm(weight)*self.args.C1/2 + util.fused_norm(weight)*self.args.C2/2
@@ -149,7 +149,6 @@ class ModelEvaluator_test(object):
         approx_d_calibration_20 = util.d_calibration(points=all_cdf, is_dead=is_dead, args=self.args, nbins=self.num_xcal_bins, gamma=1e5, differentiable=False, device=DEVICE)
         approx_d_calibration_40 = util.d_calibration(points=all_cdf, is_dead=is_dead, args=self.args, nbins=self.num_xcal_bins*2, gamma=1e5, differentiable=False, device=DEVICE)
         approx_d_calibration_60 = util.d_calibration(points=all_cdf, is_dead=is_dead, args=self.args, nbins=self.num_xcal_bins*3, gamma=1e5, differentiable=False, device=DEVICE)
-        brier_score = util.brier_score(all_cdf, all_tte)
         
         metrics[phase + '_' + 'NLL'] = metrics[phase + '_' + 'loss']
         metrics[phase + '_' + 'concordance'] = concordance
@@ -185,9 +184,6 @@ class ModelEvaluator_test(object):
         
         print(' ---- {} epoch Concordance {:.4f}'.format(phase, concordance))
         print(' ---- {} epoch end S-cal(20) {:.5f}'.format(phase, approx_s_calibration))
-        #print(' ---- {} epoch end U-cal 1 {:.3f}'.format(phase, approx_u1_calibration))
-        #print(' ---- {} epoch end U-cal 2 {:.3f}'.format(phase, approx_u2_calibration))
-        #print(' ---- {} epoch end U-cal 3 {:.3f}'.format(phase, approx_u3_calibration))
         print(' ---- {} epoch end D-cal(10) {:.5f}'.format(phase, approx_d_calibration_10))
         print(' ---- {} epoch end D-cal(20) {:.5f}'.format(phase, approx_d_calibration_20))
         print(' ---- {} epoch end D-cal(40) {:.5f}'.format(phase, approx_d_calibration_40))

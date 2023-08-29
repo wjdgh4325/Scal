@@ -144,7 +144,6 @@ class ModelEvaluator(object):
         approx_d_calibration_20 = util.d_calibration(points=all_cdf, is_dead=is_dead, args=self.args, nbins=self.num_xcal_bins, gamma=1e5, differentiable=True, device=DEVICE)
         approx_d_calibration_40 = util.d_calibration(points=all_cdf, is_dead=is_dead, args=self.args, nbins=self.num_xcal_bins*2, gamma=1e5, differentiable=True, device=DEVICE)
         approx_d_calibration_60 = util.d_calibration(points=all_cdf, is_dead=is_dead, args=self.args, nbins=self.num_xcal_bins*3, gamma=1e5, differentiable=True, device=DEVICE)
-        brier_score = util.brier_score(all_cdf, all_tte)
         
         metrics[phase + '_' + 'NLL'] = metrics[phase + '_' + 'loss']
         metrics[phase + '_' + 'concordance'] = concordance
@@ -164,9 +163,6 @@ class ModelEvaluator(object):
         
         print(' ---- {} epoch Concordance {:.4f}'.format(phase, concordance))
         print(' ---- {} epoch end S-cal(20) {:.5f}'.format(phase, approx_s_calibration))
-        #print(' ---- {} epoch end U-cal 1 {:.3f}'.format(phase, approx_u1_calibration))
-        #print(' ---- {} epoch end U-cal 2 {:.3f}'.format(phase, approx_u2_calibration))
-        #print(' ---- {} epoch end U-cal 3 {:.3f}'.format(phase, approx_u3_calibration))
         print(' ---- {} epoch end D-cal(10) {:.5f}'.format(phase, approx_d_calibration_10))
         print(' ---- {} epoch end D-cal(20) {:.5f}'.format(phase, approx_d_calibration_20))
         print(' ---- {} epoch end D-cal(40) {:.5f}'.format(phase, approx_d_calibration_40))

@@ -8,19 +8,19 @@ def get_p_value(cdf, tte, is_dead, B=1000, device='cpu'):
     tte = tte.to(device).view(-1, 1)
 
     points_dead = cdf[is_dead == 1]
-    #points_dead = points_dead.expand(points_dead.shape[0], B)
+    points_dead = points_dead.expand(points_dead.shape[0], B)
     points_cens = cdf[is_dead == 0]
-    #predict_dead = (1 - points_cens) * torch.rand(B).to(device) + points_cens
-    predict_dead = (points_cens + 1) / 2
+    predict_dead = (1 - points_cens) * torch.rand(B).to(device) + points_cens
+    #predict_dead = (points_cens + 1) / 2
 
     statistics_dead = torch.cat([points_dead, predict_dead], dim=0)
     uniform_dead = torch.sort(statistics_dead, dim=0)[0].cpu()
-    #ecdf_dead = (((torch.arange(cdf.shape[0]) + 1) / cdf.shape[0]).view(-1, 1).expand(cdf.shape[0], B)).cpu()
-    ecdf_dead = (((torch.arange(cdf.shape[0]) + 1) / cdf.shape[0]).view(-1, 1)).cpu()
+    ecdf_dead = (((torch.arange(cdf.shape[0]) + 1) / cdf.shape[0]).view(-1, 1).expand(cdf.shape[0], B)).cpu()
+    #ecdf_dead = (((torch.arange(cdf.shape[0]) + 1) / cdf.shape[0]).view(-1, 1)).cpu()
 
     difference = abs(uniform_dead - ecdf_dead)
-    #KS_statistic = (torch.max(difference, dim=0)[0]).mean()
-    KS_statistic = torch.max(difference, dim=0)[0][0]
+    KS_statistic = (torch.max(difference, dim=0)[0]).mean()
+    #KS_statistic = torch.max(difference, dim=0)[0][0]
     
     z = KS_statistic * np.sqrt((cdf.shape[0]**2) / (2*cdf.shape[0]))
     p = 0
