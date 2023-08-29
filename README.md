@@ -1,3 +1,6 @@
+# python version
+3.9
+
 # Synthetic data
     # Lognormal distribution
 	# Cox
