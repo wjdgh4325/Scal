@@ -77,4 +77,7 @@
 		python train_xcal.py --name xcal --dataset support --batch_size 128 --optimizer adam --model SyntheticNN --model_dist lognormal --censor True --lr 1e-3 --num_epochs 500 --lam 1.0 --seed 1 --data_dir data/support/
 
   # Record the model result (example)
-  python test.py --name 0829 --dataset synthetic --batch_size 10000 --model SyntheticNN --model_dist cox --censor True --lam 1.0 --phase test --dropout_rate 0.0 --ckpt_path ckpts\cox_scal_11_20_ds_synthetic_lognormal_lam1.0_dr0.1_bs32_lr0.001_optimadam_epoch300_seed1\best.pth.tar 
+  	# Scal
+   	    python test.py --name 0829 --dataset synthetic --batch_size 10000 --model SyntheticNN --model_dist cox --censor True --lam 1.0 --phase test --dropout_rate 0.0 --ckpt_path ckpts\cox_scal_11_20_ds_synthetic_lognormal_lam1.0_dr0.1_bs200_lr0.001_optimadam_epoch300_seed1\best.pth.tar 
+	# Xcal
+ 	    python test_xcal.py --name 0829 --dataset synthetic --batch_size 10000 --model SyntheticNN --model_dist cox --censor True --lam 1.0 --phase test --dropout_rate 0.0 --ckpt_path ckpts\cox_xcal_20_ds_synthetic_lognormal_lam1.0_dr0.1_bs200_lr0.001_optimadam_epoch300_seed1\best.pth.tar 
