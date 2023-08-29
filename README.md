@@ -81,3 +81,6 @@
    	    python test.py --name 0829 --dataset synthetic --batch_size 10000 --model SyntheticNN --model_dist cox --censor True --lam 1.0 --phase test --dropout_rate 0.0 --ckpt_path ckpts\cox_scal_11_20_ds_synthetic_lognormal_lam1.0_dr0.1_bs200_lr0.001_optimadam_epoch300_seed1\best.pth.tar 
 	# Xcal
  	    python test_xcal.py --name 0829 --dataset synthetic --batch_size 10000 --model SyntheticNN --model_dist cox --censor True --lam 1.0 --phase test --dropout_rate 0.0 --ckpt_path ckpts\cox_xcal_20_ds_synthetic_lognormal_lam1.0_dr0.1_bs200_lr0.001_optimadam_epoch300_seed1\best.pth.tar 
+
+	# Excel
+ 	    In evaluator/model_evaluator_test.py and evaluator/model_evaluator_test_xcal.py, directory of excel file to be saved should be clarified. And "tmp.xlsx" file (which will save the result) should exist in the directory
