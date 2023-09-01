@@ -13,7 +13,7 @@ def s_calibration(points, is_dead, args, gamma=1.0, differentiable=False, device
         s = ((torch.arange(20) + 1) / 20).to(device)
 
     else:
-        s = torch.distributions.Beta(args.alpha, args.beta).sample((args.num_s, ))
+        s = torch.distributions.Beta(args.alpha, args.beta).sample((args.num_s, )).to(device)
         #s = (1 - 0.05) * torch.rand(args.num_s).to(device) + 0.05 # [0.05, 1]
     
     zeros = torch.zeros(s.shape[0]).to(device)
