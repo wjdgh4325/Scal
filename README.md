@@ -1,7 +1,7 @@
 # python version
 3.9
 
-# iteration (parametric NN)
+# iteration (parametric NN / lognormal synthetic data)
 	import os
 	
 	for i in range(1, 51):
