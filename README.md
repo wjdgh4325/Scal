@@ -2,7 +2,7 @@
 3.9
 
 # iteration (parametric NN / lognormal synthetic data)
-# Scal
+    # Scal
 	import os
 	
 	for i in range(1, 51):
@@ -12,7 +12,7 @@
 	            file_list = "train.py --name scal --dataset synthetic --data_dir data/lognormal_54.89%/ --batch_size 200 --censor True --lam " + str(j) + " --model SyntheticNN --model_dist lognormal --num_s " + str(k) + " --num_epochs 500 --lr 1e-3 --optimizer adam --seed " + str(i)
 	            os.system("python " + file_list)
 
-# Xcal
+    # Xcal
 	import os
 	
 	for i in range(1, 51):
@@ -20,6 +20,7 @@
 		    print("seed:", i, "lambda:", j)
 		    file_list = "train_xcal.py --name xcal --dataset synthetic --data_dir data/lognormal_54.89%/ --batch_size 200 --censor True --lam " + str(j) + " --model SyntheticNN --model_dist lognormal --num_epochs 500 --lr 1e-3 --optimizer adam --seed " + str(i)
 		    os.system("python " + file_list)
+
 # Synthetic data
     # Lognormal distribution
 	# Cox
