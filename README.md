@@ -21,6 +21,26 @@
 	        file_list = "train_xcal.py --name xcal --dataset synthetic --data_dir data/lognormal_54.89%/ --batch_size 200 --censor True --lam " + str(j) + " --model SyntheticNN --model_dist lognormal --num_epochs 500 --lr 1e-3 --optimizer adam --seed " + str(i)
 	        os.system("python " + file_list)
 
+# iteration (MTLR)
+# Scal
+	import os
+	
+	for i in range(1, 51):
+	    for j in [1, 10, 20, 30, 50, 70, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 10000]:
+	        for k in [1, 2, 5, 10, 20, 50]:
+	            print("dataset:", i, "lambda:", j, "s:", k)
+	            file_list = "train.py --name scal --dataset synthetic --data_dir data/lognormal/censor_50/" + str(i) + "/ --batch_size 200 --censor True --lam " + str(j) + " --model MTLRNN --model_dist mtlr --num_s " + str(k) + " --num_epochs 2000 --lr 1e-3 --optimizer adam"
+	            os.system("python " + file_list)
+
+    # Xcal
+	import os
+	
+	for i in range(1, 51):
+	    for j in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]:
+	        print("seed:", i, "lambda:", j)
+	        file_list = "train_xcal.py --name xcal --dataset synthetic --data_dir data/lognormal/censor_50/" + str(i) + "/ --batch_size 200 --censor True --lam " + str(j) + " --model MTLRNN --model_dist mtlr --num_epochs 2000 --lr 1e-3 --optimizer adam"
+	        os.system("python " + file_list)
+	 
 # Synthetic data
     # Lognormal distribution
 	# Cox
