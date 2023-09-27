@@ -22,7 +22,7 @@
 	        os.system("python " + file_list)
 
 # iteration (MTLR)
-# Scal
+	# Scal
 	import os
 	
 	for i in range(1, 51):
