@@ -43,8 +43,8 @@ class BaseArgParser(object):
         self.parser.add_argument('--interpolate', type=util.str_to_bool, default=True)
         self.parser.add_argument('--num_xcal_bins', type=int, default=20)
         self.parser.add_argument('--num_s', type=int, default=1, help='number of s')
-        self.parser.add_argument('--alpha', type=int, default=1, help='determining parameter of Beta distribution')
-        self.parser.add_argument('--beta', type=int, default=1, help='determining parameter of Beta distribution')
+        self.parser.add_argument('--alpha', type=float, default=1, help='determining parameter of Beta distribution')
+        self.parser.add_argument('--beta', type=float, default=1, help='determining parameter of Beta distribution')
         self.parser.add_argument('--C1', type=float, default=0)
         self.parser.add_argument('--C2', type=float, default=0)
         self.is_training = None
