@@ -141,7 +141,7 @@ else:
 
 # TIMES ARE SAMPLED, NOT DETERMINISTICALLY THE MEAN
 surv_t = p_surv_t.sample()
-censor_t = p_censor_t.sample() * 1.5
+censor_t = p_censor_t.sample()
 # 10% - 7, 5% - 15
 
 # TRAIN VALID TEST SPLIT
